@@ -57,19 +57,18 @@ def do_work(pointcloud):
 @app.route('/upload', methods=['POST', 'GET'])
 def upload_pointcloud():
     if request.method == 'POST':
-        # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
         f = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
         if f.filename == '':
             flash('No selected file')
             return redirect(request.url)
         if f and allowed_file(f.filename):
             filename = secure_filename(f.filename)
             uid = str(uuid.uuid4())
+            if not os.path.isdir(app.config['UPLOAD_FOLDER']): # Create upload folder if required
+                os.mkdir(app.config['UPLOAD_FOLDER'])
             f.save(os.path.join(app.config['UPLOAD_FOLDER'], "{}_{}".format(uid, filename)))
             POINTCLOUDS[uid] = Pointcloud(uid=uid, name=request.form["title"])
             # spawn & kick off worker thread
@@ -79,7 +78,7 @@ def upload_pointcloud():
     return render_template("upload.html")
 
 def _save_data():
-    # dump POINTCLOUDS to file
+    # dump POINTCLOUDS to data.json
     with open("data.json", "w") as f:
         f.write(jsonpickle.encode(POINTCLOUDS))
 
@@ -91,6 +90,7 @@ if __name__ == "__main__":
     except IOError: # file didn't exist, no need to do anything (default is {} anyways)
         pass
         
+    # Dump data to JSON file when exiting
     atexit.register(_save_data)
 
     app.run()

@@ -24,9 +24,10 @@ class ProcessingStage:
         self.delta = delta
 
 class Pointcloud:
-    def __init__(self, uid, name):
+    def __init__(self, uid, name, filename):
         self.uid = uid
         self.name = name
+        self.filename = filename
 
         self.complete = False
         self.progress = 0
@@ -42,6 +43,34 @@ class Pointcloud:
             self.progress = 100
             for s in self.stages:
                 s.state = "success"
+
+    def istype(self, extension):
+        assert extension.startswith(".")
+        return self.filename.endswith(extension)
+
+    @property
+    def las_filename(self):
+        if self.istype(".las"):
+            return self.filename
+        elif self.istype(".pcd"):
+            return self.filename[:-4] + ".las"
+        else: # HACK manually crash program with appropriate error message (should never happen)
+            assert False, "File extension of filename {} not allowed!".format(self.filename)
+    @property
+    def las_path(self):
+        return "pointclouds/{}".format(self.las_filename)
+
+    @property
+    def pcd_filename(self):
+        if self.istype(".pcd"):
+            return self.filename
+        elif self.istype(".las"):
+            return self.filename[:-4] + ".pcd"
+        else: # HACK manually crash program with appropriate error message (should never happen)
+            assert False, "File extension of filename {} not allowed!".format(self.filename)
+    @property
+    def pcd_path(self):
+        return "pointclouds/{}".format(self.pcd_filename)
 
 @app.route('/')
 def home():
@@ -112,8 +141,9 @@ def upload_pointcloud():
             uid = str(uuid.uuid4())
             if not os.path.isdir(app.config['UPLOAD_FOLDER']): # Create upload folder if required
                 os.mkdir(app.config['UPLOAD_FOLDER'])
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], "{}_{}".format(uid, filename)))
-            POINTCLOUDS[uid] = Pointcloud(uid=uid, name=request.form["title"])
+            saved_file = "{}_{}".format(uid, filename)
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'], saved_file))
+            POINTCLOUDS[uid] = Pointcloud(uid=uid, name=request.form["title"], filename=saved_file)
             # spawn & kick off worker thread
             worker = threading.Thread(target=do_work, args=(POINTCLOUDS[uid],))
             worker.start()

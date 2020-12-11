@@ -1,9 +1,13 @@
+import os
+
 def to_pcd(pointcloud):
-    import time
     print("LAS -> PCD")
-    time.sleep(1)
+    if not pointcloud.istype(".pcd"): # only convert to PCD if it isn't already
+        ret = os.system("pdal translate -i pointclouds/{} -o {}".format(pointcloud.filename, pointcloud.pcd_path))
+    else: # fake successful command invocation
+        ret = 0
     print("LAS -> PCD complete")
-    return True
+    return ret == 0
 
 def remove_ground(pointcloud):
     import time

@@ -8,9 +8,23 @@
 <body>
     <h1>Point cloud details...</h1>
     {{ pc.name }}
+
     <a href="{{ url_for('pc_original', uid=pc.uid) }}">Original</a>
     {% if pc.complete %}
-        <a href="{{ url_for('pc_segmented', uid=pc.uid) }}">Segmented</a>
+        {% if pc.progress == 100 %}
+            <a href="{{ url_for('pc_segmented', uid=pc.uid) }}">Segmented</a>
+        {% else %}
+            Error, no segmented PC available!
+        {% endif %}
+    {% else %}
+        {# Progress bar and stages #}
+        {{ pc.progress }} %
+
+        <ul>
+        {% for stage in pc.stages %}
+            <li>{{ stage.name }} - {{ stage.state }}</li>
+        {% endfor %}
+        </ul>
     {% endif %}
 </body>
 

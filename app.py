@@ -5,7 +5,7 @@ import uuid
 import atexit
 import jsonpickle
 import threading
-
+import commands
 
 UPLOAD_FOLDER = './pointclouds'
 ALLOWED_EXTENSIONS = {'las', 'pcd'}
@@ -16,15 +16,44 @@ app.secret_key = "super secret!"
 
 POINTCLOUDS = {}
 
+class ProcessingStage:
+    def __init__(self, name, command, delta):
+        self.name = name
+        self.state = ""
+        self.command = command
+        self.delta = delta
+
 class Pointcloud:
     def __init__(self, uid, name):
-        self.complete = False
         self.uid = uid
         self.name = name
+
+        self.complete = False
+        self.progress = 0
+        self.stages = [
+            ProcessingStage("To PCD", commands.to_pcd, 10),
+            ProcessingStage("Deleting ground", commands.remove_ground, 80),
+            ProcessingStage("To LAS", commands.to_las, 10)
+        ]
+    
+    def mark_complete(self, success = True):
+        self.complete = True
+        if success:
+            self.progress = 100
+            for s in self.stages:
+                s.state = "success"
 
 @app.route('/')
 def home():
     return render_template("index.html", pointclouds=POINTCLOUDS.values())
+
+@app.route('/delete')
+def delete_all():
+    import shutil
+    shutil.rmtree('pointclouds')
+    os.makedirs('pointclouds')
+    POINTCLOUDS.clear()
+    return redirect(url_for('home'))
 
 @app.route("/cloud/<uid>")
 def pc_details(uid):
@@ -50,9 +79,23 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def do_work(pointcloud):
-    print("Working...")
-    # TODO actually call executables!
-    pointcloud.complete = True
+    def _call(stage):
+        stage.state = "working"
+        ret = stage.command(pointcloud)
+        if ret:
+            stage.state = "success"
+        else:
+            stage.state = "error"
+            pointcloud.mark_complete(success=False)
+        return ret
+
+    for stage in pointcloud.stages:
+        if not _call(stage):
+            print("Error on stage {}".format(stage.name))
+            return
+        pointcloud.progress += stage.delta
+    
+    pointcloud.mark_complete()
 
 @app.route('/upload', methods=['POST', 'GET'])
 def upload_pointcloud():

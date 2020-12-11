@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>{{ pc.uid }}</title>
+</head>
+
+<body>
+    <h1>Point cloud details...</h1>
+    {{ pc.filename }}
+    <a href="{{ url_for('pc_original', uid=pc.uid) }}">Original</a>
+    {% if pc.complete %}
+        <a href="{{ url_for('pc_segmented', uid=pc.uid) }}">Segmented</a>
+    {% endif %}
+</body>
+
+</html>

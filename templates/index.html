@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Home</title>
+</head>
+
+<body>
+<ul>
+  {% for pc in pointclouds %}
+  <li><a href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.filename }} ({{ pc.uid }})</a></li>
+  {% else %}
+  <li>There are no pointclouds!</li>
+  {% endfor %}
+</ul>
+  <a href="{{ url_for('upload_pointcloud') }}">Upload</a>
+</body>
+
+</html>

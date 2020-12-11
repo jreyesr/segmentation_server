@@ -7,7 +7,7 @@
 
 <body>
     <h1>Point cloud details...</h1>
-    {{ pc.filename }}
+    {{ pc.name }}
     <a href="{{ url_for('pc_original', uid=pc.uid) }}">Original</a>
     {% if pc.complete %}
         <a href="{{ url_for('pc_segmented', uid=pc.uid) }}">Segmented</a>

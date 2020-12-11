@@ -8,7 +8,7 @@
 <body>
 <ul>
   {% for pc in pointclouds %}
-  <li><a href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.filename }} ({{ pc.uid }})</a></li>
+  <li><a href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.name }} ({{ pc.uid }})</a></li>
   {% else %}
   <li>There are no pointclouds!</li>
   {% endfor %}

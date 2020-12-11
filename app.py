@@ -17,10 +17,10 @@ app.secret_key = "super secret!"
 POINTCLOUDS = {}
 
 class Pointcloud:
-    def __init__(self, uid, filename):
+    def __init__(self, uid, name):
         self.complete = False
         self.uid = uid
-        self.filename = filename
+        self.name = name
 
 @app.route('/')
 def home():
@@ -71,11 +71,11 @@ def upload_pointcloud():
             filename = secure_filename(f.filename)
             uid = str(uuid.uuid4())
             f.save(os.path.join(app.config['UPLOAD_FOLDER'], "{}_{}".format(uid, filename)))
-            POINTCLOUDS[uid] = Pointcloud(uid, filename)
+            POINTCLOUDS[uid] = Pointcloud(uid=uid, name=request.form["title"])
             # spawn & kick off worker thread
             worker = threading.Thread(target=do_work, args=(POINTCLOUDS[uid],))
             worker.start()
-            return redirect(url_for('home'))
+            return redirect(url_for('pc_details', uid=uid))
     return render_template("upload.html")
 
 def _save_data():
@@ -84,11 +84,11 @@ def _save_data():
         f.write(jsonpickle.encode(POINTCLOUDS))
 
 if __name__ == "__main__":
-    # populate POINTCLOUDS
+    # populate POINTCLOUDS, if there is a JSON file saved on disk
     try:
         with open("data.json") as f:
             POINTCLOUDS = jsonpickle.decode(f.read())
-    except IOError:
+    except IOError: # file didn't exist, no need to do anything (default is {} anyways)
         pass
         
     atexit.register(_save_data)

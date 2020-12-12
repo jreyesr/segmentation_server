@@ -1,4 +1,5 @@
 import os
+import shutil
 
 def to_pcd(pointcloud):
     print("LAS -> PCD")
@@ -10,15 +11,25 @@ def to_pcd(pointcloud):
     return ret == 0
 
 def remove_ground(pointcloud):
-    import time
-    print("removing ground")
-    time.sleep(3)
-    print("removing ground complete")
+    print("Removing ground")
+    shutil.copyfile(pointcloud.pcd_path, pointcloud.final_pcd_path)
+    print("Removing ground complete")
     return True
 
 def to_las(pointcloud):
-    import time
     print("PCD -> LAS")
-    time.sleep(1)
+    ret = os.system("pdal translate -i {} -o {}".format(pointcloud.final_pcd_path, pointcloud.final_las_path))
     print("PCD -> LAS complete")
-    return True
+    return ret == 0
+
+def to_potree(pointcloud, original=False):
+    print("To Potree format, original={}".format(original))
+    if original:
+        src = pointcloud.las_path
+        dst = "orig_{}".format(pointcloud.uid)
+    else:
+        src = pointcloud.final_las_path
+        dst = pointcloud.uid
+    ret = os.system("./PotreeConverter {} -o potree/pointclouds/{}".format(src, dst))
+    print("To Potree format complete")
+    return ret == 0

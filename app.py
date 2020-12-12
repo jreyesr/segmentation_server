@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, render_template, flash, redirect, url_for
+from flask import Flask, request, abort, render_template, flash, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 import uuid
@@ -33,8 +33,9 @@ class Pointcloud:
         self.progress = 0
         self.stages = [
             ProcessingStage("To PCD", commands.to_pcd, 10),
-            ProcessingStage("Deleting ground", commands.remove_ground, 80),
-            ProcessingStage("To LAS", commands.to_las, 10)
+            ProcessingStage("Deleting ground", commands.remove_ground, 70),
+            ProcessingStage("To LAS", commands.to_las, 10),
+            ProcessingStage("To Potree", commands.to_potree, 10)
         ]
     
     def mark_complete(self, success = True):
@@ -59,6 +60,9 @@ class Pointcloud:
     @property
     def las_path(self):
         return "pointclouds/{}".format(self.las_filename)
+    @property
+    def final_las_path(self):
+        return "pointclouds/final_{}.las".format(self.uid)
 
     @property
     def pcd_filename(self):
@@ -71,6 +75,9 @@ class Pointcloud:
     @property
     def pcd_path(self):
         return "pointclouds/{}".format(self.pcd_filename)
+    @property
+    def final_pcd_path(self):
+        return "pointclouds/final_{}.pcd".format(self.uid)
 
 @app.route('/')
 def home():
@@ -81,6 +88,8 @@ def delete_all():
     import shutil
     shutil.rmtree('pointclouds')
     os.makedirs('pointclouds')
+    shutil.rmtree('potree/pointclouds')
+    os.makedirs('potree/pointclouds')
     POINTCLOUDS.clear()
     return redirect(url_for('home'))
 
@@ -94,13 +103,13 @@ def pc_details(uid):
 def pc_original(uid):
     if not POINTCLOUDS.get(uid):
         abort(404)
-    return uid
+    return redirect(url_for("potree_home", uid=uid)+"?orig")
 
 @app.route("/cloud/<uid>/segmented")
 def pc_segmented(uid):
     if not POINTCLOUDS.get(uid):
         abort(404)
-    return uid
+    return redirect(url_for("potree_home", uid=uid))
 
 # Straight from https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/
 def allowed_file(filename):
@@ -143,12 +152,28 @@ def upload_pointcloud():
                 os.mkdir(app.config['UPLOAD_FOLDER'])
             saved_file = "{}_{}".format(uid, filename)
             f.save(os.path.join(app.config['UPLOAD_FOLDER'], saved_file))
-            POINTCLOUDS[uid] = Pointcloud(uid=uid, name=request.form["title"], filename=saved_file)
+            pc = Pointcloud(uid=uid, name=request.form["title"], filename=saved_file)
+            POINTCLOUDS[uid] = pc
+            # spawn & kick-off original Potree creation thread
+            threading.Thread(target=lambda: commands.to_potree(pc, original=True)).start()
             # spawn & kick off worker thread
-            worker = threading.Thread(target=do_work, args=(POINTCLOUDS[uid],))
-            worker.start()
+            threading.Thread(target=do_work, args=(pc,)).start()
             return redirect(url_for('pc_details', uid=uid))
     return render_template("upload.html")
+
+@app.route('/potree/<uuid:uid>')
+def potree_home(uid):
+    uid = str(uid)
+    
+    pc = POINTCLOUDS.get(uid)
+    if not pc:
+        abort(404)
+    potree_metadata_url = "{}{}".format("orig_" if "orig" in request.args else "", pc.uid)
+    return render_template('customAttrs.html', pointcloud=pc, potree_url=potree_metadata_url) 
+
+@app.route('/potree/<path:path>')
+def potree(path):
+    return send_from_directory('potree', path)
 
 def _save_data():
     # dump POINTCLOUDS to data.json

@@ -6,7 +6,7 @@ def _call(command):
     plat = platform.system()
     assert (plat in ("Linux, Windows")), "OS {} not supported".format(plat)
     if plat == "Windows":
-        return os.system("ubuntu2004 {}".format(command))
+        return os.system("ubuntu2004 run {}".format(command))
     elif plat == "Linux":
         return os.system(command)
 

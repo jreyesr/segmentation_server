@@ -1,0 +1,12 @@
+[
+    "gye_eclus_temp.las",
+    {
+        "type":"filters.cluster",
+        "tolerance":0.2
+    },
+    {
+        "type":"writers.las",
+        "filename":"gye_dbscan.las",
+        "extra_dims":"ClusterID=int"
+    }
+]

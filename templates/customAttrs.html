@@ -82,18 +82,18 @@
 			let scene = viewer.scene;
 			let pointcloud = e.pointcloud;
 			
-			if(pointcloud.pcoGeometry.pointAttributes.attributes.find(a => a.name === "OBJECTID")) {
+			if(pointcloud.pcoGeometry.pointAttributes.attributes.find(a => a.name === "ClusterID")) {
 				let material = pointcloud.material;
 				material.size = 1;
 				material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
 				material.shape = Potree.PointShape.SQUARE;
-				material.activeAttributeName = "OBJECTID";
+				material.activeAttributeName = "ClusterID";
 
 				material.gradient = Potree.Gradients.VIRIDIS;
 				console.log(material);
-				pointcloud.pcoGeometry.pointAttributes.attributes.find(a => a.name === "OBJECTID").initialRange = [0,1];
+				pointcloud.pcoGeometry.pointAttributes.attributes.find(a => a.name === "ClusterID").initialRange = [0,1];
 				material.extraRange = [0,1];
-				material.setRange("OBJECTID", [0,4]);
+				material.setRange("ClusterID", [0,4]);
 
 				let currentAnnotation = null;
 				viewer.renderer.domElement.addEventListener('mousedown', (e) => {
@@ -112,7 +112,7 @@
 
 						// add new annotation
 					if (hit !== null) {
-						objectId = hit.point.OBJECTID;
+						objectId = hit.point.ClusterID;
 						currentAnnotation = scene.addAnnotation([
 							hit.point.position.x,
 							hit.point.position.y,

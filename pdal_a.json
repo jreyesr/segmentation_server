@@ -1,0 +1,21 @@
+[
+    "gye.las",
+    {
+        "type":"filters.smrf"
+    },
+    {
+        "type":"filters.range",
+        "limits":"Classification[1:1]"
+    },
+    {
+        "type":"filters.smrf"
+    },
+    {
+        "type":"filters.range",
+        "limits":"Classification[1:1]"
+    },
+    {
+        "type":"writers.las",
+        "filename":"gye_eclus_temp.las"
+    }
+]

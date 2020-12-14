@@ -33,7 +33,8 @@ class Pointcloud:
         self.progress = 0
         self.stages = [
             ProcessingStage("To PCD", commands.to_pcd, 10),
-            ProcessingStage("Deleting ground", commands.remove_ground, 70),
+            ProcessingStage("Deleting ground", commands.remove_ground, 30),
+            ProcessingStage("Segmenting", commands.segment, 40),
             ProcessingStage("To LAS", commands.to_las, 10),
             ProcessingStage("To Potree", commands.to_potree, 10)
         ]
@@ -75,6 +76,12 @@ class Pointcloud:
     @property
     def pcd_path(self):
         return "pointclouds/{}".format(self.pcd_filename)
+    @property
+    def pcd_path_a(self):
+        return "pointclouds/a_{}.pcd".format(self.uid)
+    @property
+    def pcd_path_b(self):
+        return "pointclouds/b_{}.pcd".format(self.uid)
     @property
     def final_pcd_path(self):
         return "pointclouds/final_{}.pcd".format(self.uid)

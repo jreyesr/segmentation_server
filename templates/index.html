@@ -1,11 +1,8 @@
-<!doctype html>
-<html>
+{% extends '_base.html' %}
 
-<head>
-  <title>Home</title>
-</head>
+{% block title %}Home{% endblock %}
 
-<body>
+{% block body %}
 <ul>
   {% for pc in pointclouds %}
   <li><a href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.name }} ({{ pc.uid }})</a></li>
@@ -15,6 +12,4 @@
 </ul>
 <a href="{{ url_for('upload_pointcloud') }}">Upload</a>
 <a href="{{ url_for('delete_all') }}">Delete (DANGER!)</a>
-</body>
-
-</html>
+{% endblock %}

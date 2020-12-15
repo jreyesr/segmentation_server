@@ -1,11 +1,8 @@
-<!doctype html>
-<html>
+{% extends '_base.html' %}
 
-<head>
-    <title>Upload new File</title>
-</head>
+{% block title %}Upload new File{% endblock %}
 
-<body>
+{% block body %}
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     <ul class=flashes>
@@ -24,7 +21,4 @@
         <input type="file" id="file" name="file" accept=".las,.pcd" required>
         <input type="submit" value="Upload">
     </form>
-
-</body>
-
-</html>
+{% endblock %}

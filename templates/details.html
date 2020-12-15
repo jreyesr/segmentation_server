@@ -1,12 +1,8 @@
-<!doctype html>
-<html>
+{% extends '_base.html' %}
 
-<head>
-    <title>{{ pc.uid }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-icons.css') }}">
-</head>
+{% block title %}{{ pc.uid }}{% endblock %}
 
-<body>
+{% block body %}
     <h1>Point cloud details...</h1>
     {{ pc.name }}
 
@@ -24,10 +20,8 @@
         
     {% endif %}
     <ul>
-        {% for stage in pc.stages %}
-            <li>{{ stage.name }} - {{ icon(stage.state) | safe }}</li>
-        {% endfor %}
-        </ul>
-</body>
-
-</html>
+    {% for stage in pc.stages %}
+        <li>{{ stage.name }} - {{ icon(stage.state) | safe }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

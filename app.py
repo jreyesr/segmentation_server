@@ -13,6 +13,15 @@ ALLOWED_EXTENSIONS = {'las', 'pcd'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = "super secret!"
+@app.context_processor
+def icon_processor():
+    def icon(key):
+        ICONS = {"": "", 
+                 "working": '<i class="bi bi-hourglass-split"></i>',
+                 "success": '<i class="bi bi-check"></i>', 
+                 "error":   '<i class="bi bi-x"></i>'}
+        return ICONS[key]
+    return dict(icon=icon)
 
 POINTCLOUDS = {}
 

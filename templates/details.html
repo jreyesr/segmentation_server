@@ -3,6 +3,7 @@
 
 <head>
     <title>{{ pc.uid }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-icons.css') }}">
 </head>
 
 <body>
@@ -20,12 +21,13 @@
         {# Progress bar and stages #}
         {{ pc.progress }} %
 
-        <ul>
+        
+    {% endif %}
+    <ul>
         {% for stage in pc.stages %}
-            <li>{{ stage.name }} - {{ stage.state }}</li>
+            <li>{{ stage.name }} - {{ icon(stage.state) | safe }}</li>
         {% endfor %}
         </ul>
-    {% endif %}
 </body>
 
 </html>

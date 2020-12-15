@@ -2,7 +2,12 @@
     "gye_eclus_temp.las",
     {
         "type":"filters.cluster",
-        "tolerance":0.2
+        "min_points":10,
+        "tolerance":0.1
+    },
+    {
+        "type":"filters.range",
+        "limits":"ClusterID(0:]"
     },
     {
         "type":"writers.las",

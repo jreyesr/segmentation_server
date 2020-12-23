@@ -12,13 +12,13 @@
     </ul>
     {% endif %}
     {% endwith %}
-    <h1>Upload new File</h1>
+    <h1 class="my-2 mx-3">Upload new File</h1>
     <form method=post enctype=multipart/form-data> 
-        <label for="title">Nombre</label>
+        <label class="mx-3 my-3" for="title">Nombre</label>
         <input type="text" id="title" name="title" required>
         <br>
-        <label for="file">Nube</label>
+        <label class="mx-3" for="file">Nube</label>
         <input type="file" id="file" name="file" accept=".las,.pcd" required>
-        <input type="submit" value="Upload">
+        <input class= "btn btn-primary" type="submit" value="Upload">
     </form>
 {% endblock %}

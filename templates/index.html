@@ -3,13 +3,24 @@
 {% block title %}Home{% endblock %}
 
 {% block body %}
-<ul>
-  {% for pc in pointclouds %}
-  <li><a href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.name }} ({{ pc.uid }})</a></li>
-  {% else %}
-  <li>There are no pointclouds!</li>
-  {% endfor %}
-</ul>
-<a href="{{ url_for('upload_pointcloud') }}">Upload</a>
-<a href="{{ url_for('delete_all') }}">Delete (DANGER!)</a>
+<h1 class="my-2 mx-3">
+  Nubes de puntos cargadas
+</h1>
+<div class="my-4">
+  <ul>
+    {% for pc in pointclouds %}
+    <li><a class="btn btn-outline-success" href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.name }} ({{ pc.uid }})</a></li>
+    {% else %}
+    <li>No existen nube de puntos</li>
+    {% endfor %}
+  </ul>
+</div>
+<div class="row justify-content-evenly">
+  <div class="col-2">
+    <a class="btn btn-primary" href="{{ url_for('upload_pointcloud') }}">Cargar</a>
+  </div>
+  <div class="col-2">
+    <a class="btn btn-secondary" href="{{ url_for('delete_all') }}">Eliminar (PELIGRO)</a>
+  </div>
+</div>
 {% endblock %}

@@ -207,4 +207,4 @@ if __name__ == "__main__":
     # Dump data to JSON file when exiting
     atexit.register(_save_data)
 
-    app.run()
+    app.run(debug=True)

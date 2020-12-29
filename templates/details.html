@@ -3,20 +3,21 @@
 {% block title %}{{ pc.uid }}{% endblock %}
 
 {% block body %}
-    <h1 class="my-2 mx-3">Point cloud details...</h1>
+    <h1 class="my-2 mx-3">Detalle de nube de puntos</h1>
     <div class="my-2 mx-3">
-        {{ pc.name }}
-        <a class= "btn btn-primary btn-sm" href="{{ url_for('pc_original', uid=pc.uid) }}">Original</a>
+        <div class="my-3">
+            {{ pc.name }}
+            <a class= "btn btn-primary btn-sm" href="{{ url_for('pc_original', uid=pc.uid) }}">Original</a>
         {% if pc.complete %}
             {% if pc.progress == 100 %}
-                <a class= "btn btn-primary btn-sm" href="{{ url_for('pc_segmented', uid=pc.uid) }}">Segmented</a>
+                <a class= "btn btn-primary btn-sm" href="{{ url_for('pc_segmented', uid=pc.uid) }}">Segmentada</a>
             {% else %}
-                Error, no segmented PC available!
+                Error, No se efectúo la segmentación. PC disponible
             {% endif %}
+        </div>
         {% else %}
             {# Progress bar and stages #}
             {{ pc.progress }} %
-
         {% endif %}
         <ul>
         {% for stage in pc.stages %}

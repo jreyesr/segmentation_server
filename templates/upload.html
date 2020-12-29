@@ -1,6 +1,6 @@
 {% extends '_base.html' %}
 
-{% block title %}Upload new File{% endblock %}
+{% block title %}Cargar nuevo archivo{% endblock %}
 
 {% block body %}
     {% with messages = get_flashed_messages() %}
@@ -12,13 +12,22 @@
     </ul>
     {% endif %}
     {% endwith %}
-    <h1 class="my-2 mx-3">Upload new File</h1>
-    <form method=post enctype=multipart/form-data> 
-        <label class="mx-3 my-3" for="title">Nombre</label>
-        <input type="text" id="title" name="title" required>
-        <br>
-        <label class="mx-3" for="file">Nube</label>
-        <input type="file" id="file" name="file" accept=".las,.pcd" required>
-        <input class= "btn btn-primary" type="submit" value="Upload">
+    <h1 class="my-2 mx-3">Cargar nuevo archivo</h1>
+    <form method=post enctype=multipart/form-data>
+        <div class="row mx-3 my-3">
+            <label class="col-sm-1 col-form-label" for="title">Nombre</label>
+            <div class="col-sm-11">
+                <input class="form-control" type="text" id="title" name="title" required>
+            </div>
+        </div> 
+        <div class="row mb-3 mx-3">
+            <label class="col-sm-1 col-form-label" for="formFile">Nube de puntos</label>
+            <div class="col-sm-11">
+                <input type="file" class="form-control" id="file" name="file" accept=".las,.pcd" required>
+            </div>  
+        </div>
+        <div class="d-flex justify-content-center"">
+            <input class= "btn btn-primary btn-lg" type="submit" value="Cargar">
+        </div>
     </form>
 {% endblock %}

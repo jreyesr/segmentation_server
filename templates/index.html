@@ -6,14 +6,12 @@
 <h1 class="my-2 mx-3">
   Nubes de puntos cargadas
 </h1>
-<div class="my-4">
-  <ul>
+<div class="my-4 mx-3">
     {% for pc in pointclouds %}
-    <li><a class="btn btn-outline-success" href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.name }} ({{ pc.uid }})</a></li>
+    <a class="btn btn-outline-success my-1" href="{{ url_for('pc_details', uid=pc.uid) }}">{{ pc.name }} ({{ pc.uid }})</a><br>
     {% else %}
-    <li>No existen nube de puntos</li>
+    <h2>No existen nube de puntos</h2>
     {% endfor %}
-  </ul>
 </div>
 <div class="row justify-content-evenly">
   <div class="col-2">

@@ -41,11 +41,11 @@ class Pointcloud:
         self.complete = False
         self.progress = 0
         self.stages = [
-            ProcessingStage("To PCD", commands.to_pcd, 10),
-            ProcessingStage("Deleting ground", commands.remove_ground, 30),
-            ProcessingStage("Segmenting", commands.segment, 40),
-            ProcessingStage("To LAS", commands.to_las, 10),
-            ProcessingStage("To Potree", commands.to_potree, 10)
+            ProcessingStage("Convirtiendo a PCD", commands.to_pcd, 10),
+            ProcessingStage("Eliminando Suelo", commands.remove_ground, 30),
+            ProcessingStage("Segmentando", commands.segment, 40),
+            ProcessingStage("Convirtiendo a LAS", commands.to_las, 10),
+            ProcessingStage("Visualización en Potree", commands.to_potree, 10)
         ]
     
     def mark_complete(self, success = True):

@@ -25,4 +25,18 @@
         {% endfor %}
         </ul>
     </div>
+    {% if pc.complete %}
+        {% if pc.progress == 100 %}
+            <div class="d-flex justify-content-center">
+                <button type="button" class="btn btn-primary dropdown-toggle btn-lg" data-bs-toggle="dropdown" aria-expanded="false">
+                Descargar Resultado
+                </button>
+                <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Nube de puntos segmentada (LAS)</a></li>
+                <li><a class="dropdown-item" href="#">Nubes de puntos separadas (ZIP)</a></li>
+                <li><a class="dropdown-item" href="#">Polígonos Envolventes (KML)</a></li>
+                </ul>
+            </div>
+        {% endif %}
+    {% endif %}
 {% endblock %}

@@ -45,6 +45,6 @@ def to_potree(pointcloud, original=False):
     else:
         src = pointcloud.final_las_path
         dst = pointcloud.uid
-    ret = _call("./PotreeConverter {} -o potree/pointclouds/{}".format(src, dst))
+    ret = _call("LD_LIBRARY_PATH=$(pwd)/PotreeConverterLibs ./PotreeConverter {} -o potree/pointclouds/{}".format(src, dst))
     print("To Potree format complete")
     return ret == 0

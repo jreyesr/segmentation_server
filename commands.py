@@ -21,13 +21,13 @@ def to_pcd(pointcloud):
 
 def remove_ground(pointcloud):
     print("Removing ground")
-    ret = _call("pdal translate -i {} -o {} --json pdal_a.json".format(pointcloud.pcd_path, pointcloud.pcd_path_a))
+    ret = _call("pdal translate -i pointclouds/{} -o {} --json pdal_a.json".format(pointcloud.filename, pointcloud.pcd_path_a))
     print("Removing ground complete")
     return ret == 0
     
 def segment(pointcloud):
     print("Segmenting objects")
-    ret = _call("pdal translate -i {} -o {} --json pdal_b.json".format(pointcloud.pcd_path_a, pointcloud.final_pcd_path))
+    ret = _call("./cluster_extraction -i {} -o {}".format(pointcloud.pcd_path_a, pointcloud.final_pcd_path))
     print("Segmenting objects complete")
     return ret == 0
 

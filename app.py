@@ -41,8 +41,8 @@ class Pointcloud:
         self.complete = False
         self.progress = 0
         self.stages = [
-            ProcessingStage("Convirtiendo a PCD", commands.to_pcd, 10),
-            ProcessingStage("Eliminando Suelo", commands.remove_ground, 30),
+            # ProcessingStage("Convirtiendo a PCD", commands.to_pcd, 10),
+            ProcessingStage("Eliminando Suelo", commands.remove_ground, 40),
             ProcessingStage("Segmentando", commands.segment, 40),
             ProcessingStage("Convirtiendo a LAS", commands.to_las, 10),
             ProcessingStage("Visualización en Potree", commands.to_potree, 10)
@@ -192,6 +192,8 @@ def potree(path):
     return send_from_directory('potree', path)
 
 def _save_data():
+    print("Dumping data")
+    print(list(POINTCLOUDS.keys()))
     # dump POINTCLOUDS to data.json
     with open("data.json", "w") as f:
         f.write(jsonpickle.encode(POINTCLOUDS))
@@ -207,4 +209,4 @@ if __name__ == "__main__":
     # Dump data to JSON file when exiting
     atexit.register(_save_data)
 
-    app.run(debug=True)
+    app.run(debug=False)

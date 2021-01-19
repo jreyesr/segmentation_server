@@ -48,3 +48,10 @@ def to_potree(pointcloud, original=False):
     ret = _call("LD_LIBRARY_PATH=$(pwd)/PotreeConverterLibs ./PotreeConverter {} -o potree/pointclouds/{}".format(src, dst))
     print("To Potree format complete")
     return ret == 0
+    
+def split_parts(pointcloud):
+    print("Creating individual pointclouds")
+    os.makedirs("pointclouds/parts/{}".format(pointcloud.uid))
+    ret = _call('pdal translate -i {} -o pointclouds/parts/{}/#.las --json split_ids.json --readers.las.extra_dims="ClusterID=int"'.format(pointcloud.final_las_path, pointcloud.uid))
+    print("Creating individual pointclouds complete")
+    return ret == 0

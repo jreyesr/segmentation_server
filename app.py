@@ -1,10 +1,15 @@
-from flask import Flask, request, abort, render_template, flash, redirect, url_for, send_from_directory
+from flask import Flask, request, abort, render_template, flash, redirect, url_for, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 import os
+import glob
+import io
 import uuid
 import atexit
 import jsonpickle
 import threading
+import time
+import zipfile
+
 import commands
 
 UPLOAD_FOLDER = './pointclouds'
@@ -42,10 +47,11 @@ class Pointcloud:
         self.progress = 0
         self.stages = [
             # ProcessingStage("Convirtiendo a PCD", commands.to_pcd, 10),
-            ProcessingStage("Eliminando Suelo", commands.remove_ground, 40),
+            ProcessingStage("Eliminando Suelo", commands.remove_ground, 30),
             ProcessingStage("Segmentando", commands.segment, 40),
             ProcessingStage("Convirtiendo a LAS", commands.to_las, 10),
-            ProcessingStage("Visualización en Potree", commands.to_potree, 10)
+            ProcessingStage("Visualización en Potree", commands.to_potree, 10),
+            ProcessingStage("Separando objetos", commands.split_parts, 10)
         ]
     
     def mark_complete(self, success = True):
@@ -132,6 +138,23 @@ def pc_segmented(uid):
     if not POINTCLOUDS.get(uid):
         abort(404)
     return redirect(url_for("potree_home", uid=uid))
+    
+@app.route("/cloud/<uid>/downloads/<dw>")
+def download(uid, dw):
+    if not POINTCLOUDS.get(uid):
+        abort(404)
+    print("Rquested download {}".format(dw))
+    if dw == "final.las":
+        pass
+    elif dw == "split.zip":
+        memory_file = io.BytesIO()
+        with zipfile.ZipFile(memory_file, 'w') as zf:
+            for fname in glob.glob("pointclouds/parts/{}/*.las".format(uid)):
+                zf.write(fname, os.path.basename(fname), compress_type=zipfile.ZIP_DEFLATED)
+        memory_file.seek(0)
+        return send_file(memory_file, attachment_filename='{}.zip'.format(uid), as_attachment=True)
+
+    return redirect(url_for("pc_details", uid=uid))
 
 # Straight from https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/
 def allowed_file(filename):

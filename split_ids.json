@@ -1,0 +1,12 @@
+[
+    {
+        "type":"readers.las",
+        "filename":"foo.las",
+        "extra_dims":"ClusterID=int"
+    },
+    {
+        "type":"filters.groupby",
+        "dimension":"ClusterID"
+    },
+    "out/#.las"
+]

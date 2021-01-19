@@ -32,9 +32,9 @@
                 Descargar Resultado
                 </button>
                 <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Nube de puntos segmentada (LAS)</a></li>
-                <li><a class="dropdown-item" href="#">Nubes de puntos separadas (ZIP)</a></li>
-                <li><a class="dropdown-item" href="#">Polígonos Envolventes (KML)</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('download', uid=pc.uid, dw='final.las') }}">Nube de puntos segmentada (LAS)</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('download', uid=pc.uid, dw='split.zip') }}">Nubes de puntos separadas (ZIP)</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('download', uid=pc.uid, dw='bounds.kml') }}">Polígonos Envolventes (KML)</a></li>
                 </ul>
             </div>
         {% endif %}

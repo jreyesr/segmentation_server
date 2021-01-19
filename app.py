@@ -71,6 +71,12 @@ class Pointcloud:
     def las_path(self):
         return "pointclouds/{}".format(self.las_filename)
     @property
+    def las_path_a(self):
+        return "pointclouds/a_{}.las".format(self.uid)
+    @property
+    def las_path_b(self):
+        return "pointclouds/b_{}.las".format(self.uid)
+    @property
     def final_las_path(self):
         return "pointclouds/final_{}.las".format(self.uid)
 

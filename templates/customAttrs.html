@@ -51,9 +51,10 @@
 		
 		viewer.loadGUI(() => {
 			viewer.setLanguage('en');
-			$("#menu_appearance").next().show();
+			//$("#menu_appearance").next().show();
 			$("#menu_tools").next().show();
-			$("#menu_clipping").next().show();
+			//$("#menu_clipping").next().show();
+			$("#menu_scene").next().show();
 			viewer.toggleSidebar();
 
 			// See view-source:http://potree.org/potree/examples/custom_sidebar_section.html
@@ -90,7 +91,16 @@
 				material.shape = Potree.PointShape.SQUARE;
 				material.activeAttributeName = "ClusterID";
 
-				material.gradient = Potree.Gradients.VIRIDIS;
+				//material.gradient = Potree.Gradients.VIRIDIS;
+				let gradient = Potree.Gradients.RAINBOW;
+                const NUM_ITERATIONS = 10;
+                let x = [];
+                for(let i=0;i<NUM_ITERATIONS;i++) {
+                    x=x.concat(gradient);
+                }
+                x=x.map((c, i)=>[i/x.length, c[1]]);
+                console.log(pointcloud);
+                material.gradient = x;
 				attr.initialRange = [0,1];
 				material.extraRange = [0,1];
 				material.setRange("ClusterID", attr.range);

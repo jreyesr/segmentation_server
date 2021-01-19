@@ -145,7 +145,7 @@ def download(uid, dw):
         abort(404)
     print("Rquested download {}".format(dw))
     if dw == "final.las":
-        pass
+        return send_file(POINTCLOUDS[uid].final_las_path, attachment_filename='{}.las'.format(uid), as_attachment=True)
     elif dw == "split.zip":
         memory_file = io.BytesIO()
         with zipfile.ZipFile(memory_file, 'w') as zf:

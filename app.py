@@ -51,7 +51,8 @@ class Pointcloud:
             ProcessingStage("Segmentando", commands.segment, 40),
             ProcessingStage("Convirtiendo a LAS", commands.to_las, 10),
             ProcessingStage("Visualización en Potree", commands.to_potree, 10),
-            ProcessingStage("Separando objetos", commands.split_parts, 10)
+            ProcessingStage("Separando objetos", commands.split_parts, 5),
+            ProcessingStage("Calculando polígonos envolventes", commands.get_bounds, 5)
         ]
     
     def mark_complete(self, success = True):
@@ -143,7 +144,7 @@ def pc_segmented(uid):
 def download(uid, dw):
     if not POINTCLOUDS.get(uid):
         abort(404)
-    print("Rquested download {}".format(dw))
+    print("Requested download {}".format(dw))
     if dw == "final.las":
         return send_file(POINTCLOUDS[uid].final_las_path, attachment_filename='{}.las'.format(uid), as_attachment=True)
     elif dw == "split.zip":
@@ -153,6 +154,8 @@ def download(uid, dw):
                 zf.write(fname, os.path.basename(fname), compress_type=zipfile.ZIP_DEFLATED)
         memory_file.seek(0)
         return send_file(memory_file, attachment_filename='{}.zip'.format(uid), as_attachment=True)
+    elif dw == "bounds.kml":
+        return send_file('pointclouds/{}.kml'.format(uid), attachment_filename='{}.kml'.format(uid), as_attachment=True)
 
     return redirect(url_for("pc_details", uid=uid))
 

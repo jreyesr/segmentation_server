@@ -1,6 +1,11 @@
+import glob
+import json
 import os
+import subprocess
 import shutil
 import platform
+import shapefile
+import concurrent.futures
 
 def _call(command):
     plat = platform.system()
@@ -9,6 +14,17 @@ def _call(command):
         return os.system("ubuntu2004 run {}".format(command))
     elif plat == "Linux":
         return os.system(command)
+
+def _call_get_output(command):
+    plat = platform.system()
+    assert (plat in ("Linux, Windows")), "OS {} not supported".format(plat)
+    try:
+        if plat == "Windows":
+            return subprocess.check_output(["ubuntu2004", "run"] + command)
+        elif plat == "Linux":
+            return subprocess.check_output(command)
+    except subprocess.CalledProcessError as err:
+        return ""
 
 def to_pcd(pointcloud):
     print("LAS -> PCD")
@@ -54,4 +70,35 @@ def split_parts(pointcloud):
     os.makedirs("pointclouds/parts/{}".format(pointcloud.uid))
     ret = _call('pdal translate -i {} -o pointclouds/parts/{}/#.las --json split_ids.json --readers.las.extra_dims="ClusterID=int"'.format(pointcloud.final_las_path, pointcloud.uid))
     print("Creating individual pointclouds complete")
+    return ret == 0
+
+def get_bounds(pointcloud):
+    def _get_bound(subpc):
+        out = _call_get_output(["pdal", "info", subpc, "--boundary"])
+        out = json.loads(out)
+        return subpc.split("/")[-1], out["boundary"]["boundary_json"]
+    def _create_geojson(polygons):
+        geojson = {"type": "FeatureCollection", "features": []}
+        for (pcid, poly) in polygons:
+            geojson["features"].append({"type": "Feature", "properties": { "id": pcid }, "geometry": poly })
+        with shapefile.Writer("pointclouds/{}.shp".format(pointcloud.uid)) as w: # filename ignores extension and creates .shp, .dbf and .sh
+            w.field("id", "C")
+            w.field("Name", "C")
+            for feature in filter(lambda f: len(f["geometry"]["coordinates"]) > 0, geojson["features"]): # only include features with an actual polygon
+                w.record(feature["properties"]["id"], feature["properties"]["id"])
+                w.shape(feature["geometry"])
+    def _create_kml(orig_srs):
+        return _call('ogr2ogr -a_srs "EPSG:4326" -s_srs "{1}" -t_srs "EPSG:4326" -f "KML" pointclouds/{0}.kml pointclouds/{0}.shp'.format(pointcloud.uid, orig_srs))
+
+    print("Getting pointcloud bounds")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for subpc in glob.glob("pointclouds/parts/{}/*.las".format(pointcloud.uid)):
+            futures.append(executor.submit(_get_bound, subpc=subpc))
+        # Wait for all futures to complete
+        _create_geojson([future.result() for future in concurrent.futures.as_completed(futures)])
+    info = json.loads(_call_get_output(["pdal", "info", "--metadata", "pointclouds/{}".format(pointcloud.filename)]))["metadata"]["srs"]["proj4"]
+    print(info)
+    ret = _create_kml(info)
+    print("Getting pointcloud bounds complete")
     return ret == 0

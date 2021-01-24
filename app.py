@@ -42,6 +42,7 @@ class Pointcloud:
         self.uid = uid
         self.name = name
         self.filename = filename
+        self.proj4 = ""
 
         self.complete = False
         self.progress = 0
@@ -155,7 +156,10 @@ def download(uid, dw):
         memory_file.seek(0)
         return send_file(memory_file, attachment_filename='{}.zip'.format(uid), as_attachment=True)
     elif dw == "bounds.kml":
-        return send_file('pointclouds/{}.kml'.format(uid), attachment_filename='{}.kml'.format(uid), as_attachment=True)
+        if POINTCLOUDS[uid].proj4:
+            return send_file('pointclouds/{}.kml'.format(uid), attachment_filename='{}.kml'.format(uid), as_attachment=True)
+        else:
+            abort(404, "No existe sistema de coordenadas. Verifique que el archivo subido esté georreferenciado.")
 
     return redirect(url_for("pc_details", uid=uid))
 

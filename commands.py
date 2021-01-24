@@ -71,6 +71,11 @@ def split_parts(pointcloud):
     ret = _call('pdal translate -i {} -o pointclouds/parts/{}/#.las --json split_ids.json --readers.las.extra_dims="ClusterID=int"'.format(pointcloud.final_las_path, pointcloud.uid))
     print("Creating individual pointclouds complete")
     return ret == 0
+    
+def get_proj4_string(pointcloud):
+    output = _call_get_output(["pdal", "info", "--metadata", "pointclouds/{}".format(pointcloud.filename)])
+    info = json.loads(output)["metadata"]["srs"]["proj4"]
+    return info
 
 def get_bounds(pointcloud):
     def _get_bound(subpc):
@@ -91,14 +96,20 @@ def get_bounds(pointcloud):
         return _call('ogr2ogr -a_srs "EPSG:4326" -s_srs "{1}" -t_srs "EPSG:4326" -f "KML" pointclouds/{0}.kml pointclouds/{0}.shp'.format(pointcloud.uid, orig_srs))
 
     print("Getting pointcloud bounds")
+    
+    srs = get_proj4_string(pointcloud)
+    pointcloud.proj4 = srs
+    print(repr(srs))
+    if not srs:
+        print("ERROR: PROJ4 string not set on original PC! Unable to compute object bounds!")
+        return True
+    
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for subpc in glob.glob("pointclouds/parts/{}/*.las".format(pointcloud.uid)):
             futures.append(executor.submit(_get_bound, subpc=subpc))
         # Wait for all futures to complete
         _create_geojson([future.result() for future in concurrent.futures.as_completed(futures)])
-    info = json.loads(_call_get_output(["pdal", "info", "--metadata", "pointclouds/{}".format(pointcloud.filename)]))["metadata"]["srs"]["proj4"]
-    print(info)
-    ret = _create_kml(info)
+    ret = _create_kml(srs)
     print("Getting pointcloud bounds complete")
     return ret == 0

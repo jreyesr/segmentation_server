@@ -11,7 +11,7 @@ def _call(command):
     plat = platform.system()
     assert (plat in ("Linux, Windows")), "OS {} not supported".format(plat)
     if plat == "Windows":
-        return os.system("ubuntu2004 run {}".format(command))
+        return os.system("ubuntu2004 run {}".format(command.replace('"', '\\"')))
     elif plat == "Linux":
         return os.system(command)
 
@@ -79,9 +79,20 @@ def get_proj4_string(pointcloud):
 
 def get_bounds(pointcloud):
     def _get_bound(subpc):
-        out = _call_get_output(["pdal", "info", subpc, "--boundary"])
+        # out = _call_get_output(["pdal", "info", subpc, "--boundary"])
+        out = _call_get_output(["pdal", "info", subpc, "--metadata"])
         out = json.loads(out)
-        return subpc.split("/")[-1], out["boundary"]["boundary_json"]
+        minx, maxx, miny, maxy = out["metadata"]["minx"], out["metadata"]["maxx"], out["metadata"]["miny"], out["metadata"]["maxy"]
+        ret = { "type": "Polygon", "coordinates": [ [
+            [ minx, miny ],
+            [ minx, maxy ],
+            [ maxx, maxy ],
+            [ maxx, miny ],
+            [ minx, miny ] # last coord must be same as first!
+        ] ] }
+        # boundary_json looks like { "type": "Polygon", "coordinates": [ [ [ 622982.347530439961702, 9761425.487526709213853 ], [ 622982.347530439961702, 9761456.744157770648599 ], [ 622946.255481739994138, 9761456.744157770648599 ], [ 622946.255481739994138, 9761441.115842230618 ], [ 622982.347530439961702, 9761425.487526709213853 ] ] ] }
+        # return subpc.split("/")[-1], out["metadata"]["boundary_json"]
+        return subpc.split("/")[-1], ret
     def _create_geojson(polygons):
         geojson = {"type": "FeatureCollection", "features": []}
         for (pcid, poly) in polygons:
@@ -107,7 +118,7 @@ def get_bounds(pointcloud):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for subpc in glob.glob("pointclouds/parts/{}/*.las".format(pointcloud.uid)):
-            futures.append(executor.submit(_get_bound, subpc=subpc))
+            futures.append(executor.submit(_get_bound, subpc=subpc.replace("\\", "/")))
         # Wait for all futures to complete
         _create_geojson([future.result() for future in concurrent.futures.as_completed(futures)])
     ret = _create_kml(srs)
